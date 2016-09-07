@@ -3,10 +3,10 @@ require_once __DIR__.'/vendor/autoload.php';
 use Symfony\Component\HttpFoundation\Request;
 date_default_timezone_set('Asia/Tokyo');
 echo 'hello, world';
-
+/*
 $app = new Silex\Application();
 $app->post('/callback', function (Request $request) use ($app) {
-    /*$body = json_decode($request->getContent(), true);
+    $body = json_decode($request->getContent(), true);
     foreach ($body['result'] as $msg) {
         //fromとメッセージを取得
         $from = $msg['content']['from'];
@@ -45,8 +45,8 @@ $app->post('/callback', function (Request $request) use ($app) {
         curl_exec($ch);
         curl_close($ch);
     }
-    return 0;*/
-});
+    return 0;
+});*/
 
 function dialogue($message, $context) {
     $post_data = array('utt' => $message);
