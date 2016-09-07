@@ -1,5 +1,4 @@
 <?php
-//echo "Hello World!";
 require_once __DIR__.'/vendor/autoload.php';
 use Symfony\Component\HttpFoundation\Request;
 date_default_timezone_set('Asia/Tokyo');
@@ -32,14 +31,14 @@ $app->post('/callback', function (Request $request) use ($app) {
         ];
         $ch = curl_init("https://trialbot-api.line.me/v1/events");
         curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 1);
-        curl_setopt($ch, CURLOPT_PROXY, getenv('FIXIE_URL'));
+        curl_setopt($ch, CURLOPT_PROXY, getenv('http://fixie:MXV77a8kMFHYAPf@velodrome.usefixie.com:80'));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             "Content-Type: application/json; charser=UTF-8",
-            "X-Line-ChannelID: ". getenv('LINE_CHANNEL_ID'),
-            "X-Line-ChannelSecret: ". getenv('LINE_CHANNEL_SECRET'),
-            "X-Line-Trusted-User-With-ACL: ". getenv('LINE_MID')
+            "X-Line-ChannelID: ". getenv('1474893192'),
+            "X-Line-ChannelSecret: ". getenv('054b381e4134feb2421543f0fd31d67d'),
+            "X-Line-Trusted-User-With-ACL: ". getenv('u5fd9e9941087e0b663a55ac64e255ccf')
         ]);
         curl_exec($ch);
         curl_close($ch);
@@ -52,7 +51,7 @@ function dialogue($message, $context) {
     $post_data = array('utt' => $message);
     $post_data['context'] = $context;
     // DOCOMOに送信
-    $ch = curl_init("https://api.apigw.smt.docomo.ne.jp/dialogue/v1/dialogue?APIKEY=". getenv('DOCOMO_API_key'));
+    $ch = curl_init("https://api.apigw.smt.docomo.ne.jp/dialogue/v1/dialogue?APIKEY=". getenv('7a7949696d525668572f55355251503774314e2f71664e4b474458632f6447554f6c785264385055324641'));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
