@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'vendor/autoload.php';
 use Symfony\Component\HttpFoundation\Request;
 date_default_timezone_set('Asia/Tokyo');
 echo 'hello, world';
 
-/*$app = new Silex\Application();
-$app->post('/callback', function (Request $request) use ($app) {
+$app = new Silex\Application();
+/*$app->post('/callback', function (Request $request) use ($app) {
     $body = json_decode($request->getContent(), true);
     foreach ($body['result'] as $msg) {
         //fromとメッセージを取得
