@@ -6,7 +6,7 @@ $app = new Silex\Application();
 $app->post('/callback', function (Request $request) use ($app) {
     $body = json_decode($request->getContent(), true);
     foreach ($body['result'] as $msg) {
-        //fromとメッセージを取得
+        //fromとメッセージを取得a
         $from = $msg['content']['from'];
         $message = $msg['content']['text'];
         //Redisからcontextを取得
