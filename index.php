@@ -1,66 +1,69 @@
 <?php
-require_once __DIR__.'/vendor/autoload.php';
-use Symfony\Component\HttpFoundation\Request;
-date_default_timezone_set('Asia/Tokyo');
-echo 'hello, world';
+// 設定
+define('DOCOMO_API_KEY', '');
+define('DOCOMO_MODE', 'dialog');
+define('LINE_CHANNEL_ID', '');
+define('LINE_CHANNEL_SECRET', '');
+define('LINE_MID', '');
+
+require_once(__DIR__ . '/vendor/autoload.php');
+use jp3cki\docomoDialogue\Dialogue;
 
 $app = new Silex\Application();
 $app->post('/callback', function (Request $request) use ($app) {
-    $body = json_decode($request->getContent(), true);
-    foreach ($body['result'] as $msg) {
-        //fromとメッセージを取得
-        $from = $msg['content']['from'];
-        $message = $msg['content']['text'];
-        //Redisからcontextを取得
-        $redis = new Predis\Client(getenv('REDIS_URL'));
-        $context = $redis->get($from);
-        //雑談対話APIを叩く
-        $response = dialogue($message, $context);
-        //contextをRedisに保存する
-        $redis->set($from, $response->context);
-        //LINEに返信
-        $post_data = [
-            "to" => [
-                $from
-            ],
-            "toChannel" => "1383378250",
-            "eventType" => "138311608800106203",
-            "content" => [
-                "contentType" => 1,
-                "toType" => 1,
-                "text" => $response->utt
-            ]
-        ];
-        $ch = curl_init("https://trialbot-api.line.me/v1/events");
-        curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, 1);
-        curl_setopt($ch, CURLOPT_PROXY, getenv('FIXIE_URL'));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json; charser=UTF-8",
-            "X-Line-ChannelID: ". getenv('LINE_CHANNEL_ID'),
-            "X-Line-ChannelSecret: ". getenv('LINE_CHANNEL_SECRET'),
-            "X-Line-Trusted-User-With-ACL: ". getenv('LINE_MID')
-        ]);
-        curl_exec($ch);
-        curl_close($ch);
-    }
-    return 0;
-});
+    // リクエスト取得
+    $request = file_get_contents("php://input");
+    $json = json_decode($request);
+    $content = $json->result[0]->content;
+    $message = $content->text;
 
-function dialogue($message, $context) {
-    $post_data = array('utt' => $message);
-    $post_data['context'] = $context;
-    // DOCOMOに送信
-    $ch = curl_init("https://api.apigw.smt.docomo.ne.jp/dialogue/v1/dialogue?APIKEY=". getenv('DOCOMO_API_key'));
+    // コンテキストIDを取得
+    $from = $content->from;
+    $redis = new Redis();
+    $redis->connect("127.0.0.1",6379);
+    $context = $redis->get($from);
+
+    // 送信パラメータの準備
+    $dialog = new Dialogue(DOCOMO_API_KEY);
+    $dialog->parameter->reset();
+    $dialog->parameter->utt = $message;
+    $dialog->parameter->context = $context;
+    $dialog->parameter->mode = DOCOMO_MODE;
+
+    // 対話
+    $ret = $dialog->request();
+    // コンテキストIDを保存
+    $redis->set($from, $ret->context);
+
+    $response_format_text = [
+        'contentType' => 1,
+        "toType" => 1,
+        "text" => "$ret->utt"
+    ];
+    $post_data = [
+        "to" => [
+            $from
+        ],
+        "toChannel" => "1383378250", // 固定値
+        "eventType" => "138311608800106203", // 固定値
+        "content" => $response_format_text
+    ];
+
+    // LINEに送信
+    $ch = curl_init("https://trialbot-api.line.me/v1/events");
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Content-Type: application/json; charser=UTF-8"
+        'Content-Type: application/json; charser=UTF-8',
+        "X-Line-ChannelID: " . LINE_CHANNEL_ID,
+        "X-Line-ChannelSecret: " . LINE_CHANNEL_SECRET,
+        "X-Line-Trusted-User-With-ACL: " . LINE_MID,
     ]);
-    $result = curl_exec($ch);
+    curl_exec($ch);
     curl_close($ch);
-    return json_decode($result);
-}
 
+    return 'OK';
+});
 $app->run();
