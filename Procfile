@@ -1,1 +1,1 @@
-web: vendor/bin/heroku-php-apadsdche2/
+web: vendor/bin/heroku-php-apache2 /
