@@ -39,8 +39,7 @@ $app->post('/callback', function (Request $request) use ($app) {
             "Content-Type: application/json; charser=UTF-8",
             "X-Line-ChannelID: ". getenv('LINE_CHANNEL_ID'),
             "X-Line-ChannelSecret: ". getenv('LINE_CHANNEL_SECRET'),
-            "X-Line-Trusted-User-With-ACL: ". getenv('LINE_CHANNEL_ACCESS_TOKEN')
-            //"X-Line-Trusted-User-With-ACL: ". getenv('LINE_MID')
+            "X-Line-Trusted-User-With-ACL: ". getenv('LINE_MID')
         ]);
         curl_exec($ch);
         curl_close($ch);
