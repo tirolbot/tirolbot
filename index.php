@@ -15,6 +15,18 @@ $app->post('/callback', function (Request $request) use ($app) {
         $context = $redis->get($from);
         //雑談対話APIを叩く
         $response = dialogue($message, $context);
+        
+        // LINE MessagingAPI
+        var line_options = {
+        url: 'https://api.line.me/v2/bot/message/reply',
+        headers: {
+            "Content-type": "application/json; charset=UTF-8",
+            "Authorization": " Bearer " + "{LINE_CHANNEL_ACCESS_TOKEN}"
+        },
+        body: '',
+        json: true
+        };
+        
         //contextをRedisに保存する
         $redis->set($from, $response->context);
         //LINEに返信
