@@ -22,7 +22,7 @@ $app->post('/callback', function (Request $request) use ($app) {
             "to" => [
                 $from
             ],
-            "toChannel" => "1383378250",
+            "toChannel" => "1487544753",
             "eventType" => "138311608800106203",
             "content" => [
                 "contentType" => 1,
